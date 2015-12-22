@@ -1,4 +1,4 @@
-package com.xxy.simpletodo;
+package com.xxy.simpletodo.tables;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -11,4 +11,18 @@ import com.activeandroid.annotation.Table;
 public class Item extends Model {
   @Column(name = "Content")
   public String content;
+
+  @Override
+  public String toString() {
+    return content;
+  }
+
+  public Item() {
+    super();
+  }
+
+  public Item(String content) {
+    super();
+    this.content = content;
+  }
 }

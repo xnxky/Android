@@ -9,16 +9,16 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
+import com.activeandroid.query.Select;
+import com.google.common.collect.ImmutableList;
+import com.xxy.simpletodo.tables.Item;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-  private ArrayList<String> items;
-  private ArrayAdapter<String> itemsAdapter;
+  private List<Item> items;
+  private ArrayAdapter<Item> itemsAdapter;
   private ListView lvItems;
 
   private final int REQUEST_CODE = 20;
@@ -28,12 +28,19 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     lvItems = (ListView)findViewById(R.id.lvItems);
-    readItems();
+    for(String content : ImmutableList.of(
+            "clean up the house",
+            "apply for the a credit card")
+            ) {
+      Item newItem = new Item(content);
+      newItem.save();
+    }
+    items = new Select().
+                from(Item.class).
+                execute();
     itemsAdapter = new ArrayAdapter<>(this,
             android.R.layout.simple_list_item_1, items);
     lvItems.setAdapter(itemsAdapter);
-    items.add("clean up the house");
-    items.add("apply for the a credit card");
     setupListViewListener();
     setupEditItemListener();
   }
@@ -41,9 +48,11 @@ public class MainActivity extends AppCompatActivity {
   public void addItem(View v) {
     EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
     String newItemText = etNewItem.getText().toString();
-    itemsAdapter.add(newItemText);
+    Item newItem = new Item(newItemText);
+    newItem.save();
+    items.add(newItem);
+    itemsAdapter.notifyDataSetChanged();;
     etNewItem.setText("");
-    writeItems();
   }
 
   public void setupListViewListener() {
@@ -52,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
               @Override
               public boolean onItemLongClick(AdapterView<?> adapter,
                                              View item, int pos, long id) {
+                items.get(pos).delete();
                 items.remove(pos);
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
                 return true;
               }
             });
@@ -68,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                                          View item, int pos, long id) {
 
                 Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
-                intent.putExtra("itemText", items.get(pos));
+                intent.putExtra("itemText", items.get(pos).content);
                 intent.putExtra("itemIndex", pos);
 
                 startActivityForResult(intent, REQUEST_CODE);
@@ -82,29 +91,10 @@ public class MainActivity extends AppCompatActivity {
     if(requestCode==REQUEST_CODE && resultCode==RESULT_OK) {
       int itemIndex = data.getExtras().getInt("itemIndex");
       String itemContent = data.getExtras().getString("itemText");
-      items.set(itemIndex, itemContent);
+      Item targetItem = items.get(itemIndex);
+      targetItem.content =  itemContent;
+      targetItem.save();
       itemsAdapter.notifyDataSetChanged();
-      writeItems();
-    }
-  }
-
-  private void readItems() {
-    File filesDir = getFilesDir();
-    File toDoFile = new File(filesDir, "todo");
-    try {
-      items = new ArrayList<>(FileUtils.readLines(toDoFile));
-    } catch (IOException e) {
-      items = new ArrayList<>();
-    }
-  }
-
-  private void writeItems() {
-    File filesDir = getFilesDir();
-    File toDoFile = new File(filesDir, "todo");
-    try {
-      FileUtils.writeLines(toDoFile, items);
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 
