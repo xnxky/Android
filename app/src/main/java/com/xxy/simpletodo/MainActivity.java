@@ -6,12 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import com.activeandroid.query.Select;
-import com.google.common.collect.ImmutableList;
+import com.xxy.simpletodo.adapter.ItemAdapter;
 import com.xxy.simpletodo.tables.Item;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -28,31 +29,20 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     lvItems = (ListView)findViewById(R.id.lvItems);
-    for(String content : ImmutableList.of(
-            "clean up the house",
-            "apply for the a credit card")
-            ) {
-      Item newItem = new Item(content);
-      newItem.save();
-    }
     items = new Select().
                 from(Item.class).
                 execute();
-    itemsAdapter = new ArrayAdapter<>(this,
-            android.R.layout.simple_list_item_1, items);
+    itemsAdapter = new ItemAdapter(this, items);
     lvItems.setAdapter(itemsAdapter);
     setupListViewListener();
     setupEditItemListener();
   }
 
   public void addItem(View v) {
-    EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-    String newItemText = etNewItem.getText().toString();
-    Item newItem = new Item(newItemText);
-    newItem.save();
-    items.add(newItem);
-    itemsAdapter.notifyDataSetChanged();;
-    etNewItem.setText("");
+    Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
+    intent.putExtra("item", getDefaultItem());
+    intent.putExtra("itemIndex", items.size());
+    startActivityForResult(intent, REQUEST_CODE);
   }
 
   public void setupListViewListener() {
@@ -77,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                                          View item, int pos, long id) {
 
                 Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
-                intent.putExtra("itemText", items.get(pos).content);
+                intent.putExtra("item", items.get(pos));
                 intent.putExtra("itemIndex", pos);
 
                 startActivityForResult(intent, REQUEST_CODE);
@@ -90,12 +80,24 @@ public class MainActivity extends AppCompatActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if(requestCode==REQUEST_CODE && resultCode==RESULT_OK) {
       int itemIndex = data.getExtras().getInt("itemIndex");
-      String itemContent = data.getExtras().getString("itemText");
-      Item targetItem = items.get(itemIndex);
-      targetItem.content =  itemContent;
+      Item targetItem = (Item)data.getExtras().getSerializable("item");
+      if(itemIndex == items.size()) {
+        items.add(targetItem);
+      } else {
+        items.set(itemIndex, targetItem);
+      }
       targetItem.save();
       itemsAdapter.notifyDataSetChanged();
     }
+  }
+
+  private Item getDefaultItem() {
+    return new Item(
+           "Please add the name of the item",
+           "Please edit the content ",
+           Item.Priority.HIGH,
+           new LocalDate(),
+           Item.Status.PREPARE);
   }
 
 }
