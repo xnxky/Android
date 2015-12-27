@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Reminder</string>
     <string name="title_activity_edit_item">EditItemActivity</string>
+    <string name="todo_activity_add_item">Add</string>
+    <string name="todo_activity_edit_item">Edit</string>
+    <string name="todo_activity_mark_item">Mark As Complete</string>
+    <string name="done_activity_view_item">View</string>
+    <string name="main_activity_view_item">Delete</string>
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/add_item_menu"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/todo_activity_add_item">
+    </item>
+
+    <item
+        android:id="@+id/edit_item_menu"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/todo_activity_edit_item">
+    </item>
+
+    <item
+        android:id="@+id/mark_item_menu"
+        app:showAsAction="never"
+        android:title="@string/todo_activity_mark_item">
+    </item>
+
+</menu>

@@ -1,43 +1,57 @@
-package com.xxy.simpletodo;
+package com.xxy.simpletodo.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import com.activeandroid.query.Select;
-import com.xxy.simpletodo.adapter.ItemAdapter;
-import com.xxy.simpletodo.tables.Item;
-
-import org.joda.time.LocalDate;
+import com.google.common.collect.ImmutableList;
+import com.xxy.simpletodo.R;
+import com.xxy.simpletodo.fragment.DoneFragment;
+import com.xxy.simpletodo.fragment.TabFragment;
+import com.xxy.simpletodo.fragment.TodoFragment;
+import com.xxy.simpletodo.listener.TodoTabListener;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-  private List<Item> items;
-  private ArrayAdapter<Item> itemsAdapter;
-  private ListView lvItems;
-
-  private final int REQUEST_CODE = 20;
+  //private List<Item> items;
+  //private ArrayAdapter<Item> itemsAdapter;
+  //private ListView lvItems;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    lvItems = (ListView)findViewById(R.id.lvItems);
-    items = new Select().
-                from(Item.class).
-                execute();
-    itemsAdapter = new ItemAdapter(this, items);
-    lvItems.setAdapter(itemsAdapter);
-    setupListViewListener();
-    setupEditItemListener();
+
+    final ActionBar tabBar = getSupportActionBar();
+    tabBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+    List<String> tabTextList = ImmutableList.of(
+        "ToDo",
+        "Complete"
+    );
+
+    List<TabFragment> tabFragments = ImmutableList.of(
+        new TodoFragment(),
+        new DoneFragment()
+    );
+
+    for(int i=0; i<tabTextList.size(); i++) {
+      ActionBar.Tab todoTab = tabBar.
+                              newTab().
+                              setText(tabTextList.get(i)).
+                              setTabListener(
+                                  new TodoTabListener(
+                                      tabFragments.get(i)
+                                  ));
+      tabBar.addTab(todoTab);
+    }
+    //setupListViewListener();
+    //setupEditItemListener();
   }
 
+/*
   public void addItem(View v) {
     Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
     intent.putExtra("item", getDefaultItem());
@@ -90,14 +104,6 @@ public class MainActivity extends AppCompatActivity {
       itemsAdapter.notifyDataSetChanged();
     }
   }
-
-  private Item getDefaultItem() {
-    return new Item(
-           "Please add the name of the item",
-           "Please edit the content ",
-           Item.Priority.HIGH,
-           new LocalDate(),
-           Item.Status.PREPARE);
-  }
+*/
 
 }

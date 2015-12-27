@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -17,10 +17,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EditItemActivity"
+            android:name=".activity.EditItemActivity"
             android:label="@string/title_activity_edit_item"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+            android:name=".activity.ViewItemActivity"
+            android:label="ViewItemActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <meta-data android:name="AA_DB_NAME" android:value="SimpleToDo.db" />
         <meta-data android:name="AA_DB_VERSION" android:value="1" />
         <meta-data

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/view_item_menu"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/done_activity_view_item">
+    </item>
+
+    <item
+        android:id="@+id/undone_item_menu"
+        app:showAsAction="ifRoom|withText"
+        android:title="Mark As ToDo">
+    </item>
+
+</menu>

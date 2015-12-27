@@ -1,4 +1,4 @@
-package com.xxy.simpletodo;
+package com.xxy.simpletodo.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,14 +8,18 @@ import android.text.Selection;
 import android.view.View;
 import android.widget.EditText;
 
-import com.xxy.simpletodo.tables.Item;
+import com.xxy.simpletodo.R;
+import com.xxy.simpletodo.table.Item;
 
-import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class EditItemActivity extends AppCompatActivity {
 
   private int itemIndex;
   private Item targetItem;
+  private DateTimeFormatter dtFormatter =
+          DateTimeFormat.forPattern("MM/dd/yy");
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +39,7 @@ public class EditItemActivity extends AppCompatActivity {
     EditText etPriority = (EditText) findViewById(R.id.etItemPriority);
     etPriority.setText(targetItem.priority.name());
     EditText etDueDate = (EditText) findViewById(R.id.etItemDueDate);
-    etDueDate.setText(targetItem.dueDate.toString("MM/dd/yyyy"));
-    EditText etStatus = (EditText) findViewById(R.id.etItemStatus);
-    etStatus.setText(targetItem.status.name());
-
+    etDueDate.setText(targetItem.getDate());
   }
 
   public void saveItem(View v) {
@@ -49,13 +50,11 @@ public class EditItemActivity extends AppCompatActivity {
     EditText etPriority = (EditText) findViewById(R.id.etItemPriority);
     targetItem.priority = Item.Priority.valueOf(etPriority.getText().toString());
     EditText etDueDate = (EditText) findViewById(R.id.etItemDueDate);
-    targetItem.dueDate = new LocalDate(etDueDate.getText().toString());
-    EditText etStatus = (EditText) findViewById(R.id.etItemStatus);
-    targetItem.status = Item.Status.valueOf(etStatus.getText().toString());
+    targetItem.setDueDate(etDueDate.getText().toString());
 
     Intent intent = new Intent();
     intent.putExtra("itemIndex", itemIndex);
-    intent.putExtra("itemText", targetItem);
+    intent.putExtra("item", targetItem);
 
     setResult(RESULT_OK, intent);
     finish();
