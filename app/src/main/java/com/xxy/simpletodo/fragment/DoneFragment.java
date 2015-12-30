@@ -117,6 +117,7 @@ public class DoneFragment extends TabFragment {
     while(iterator.hasNext()) {
       Item curItem = iterator.next();
       if(curItem.isChecked) {
+        curItem.isChecked = false;
         curItem.isDone = false;
         curItem.save();
         iterator.remove();

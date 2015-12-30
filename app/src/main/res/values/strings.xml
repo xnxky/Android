@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">Reminder</string>
-    <string name="title_activity_edit_item">EditItemActivity</string>
     <string name="todo_activity_add_item">Add</string>
     <string name="todo_activity_edit_item">Edit</string>
     <string name="todo_activity_mark_item">Mark As Complete</string>
     <string name="done_activity_view_item">View</string>
     <string name="main_activity_view_item">Delete</string>
+    <string name="select_all">Select All</string>
+    <string name="unselect_all">Unselect All</string>
+    <string name="task_name">Task Name  </string>
+    <string name="task_note">Note  </string>
+    <string name="task_priority">Priority  </string>
+    <string name="task_due_date">Due Date  </string>
+    <string name="task_comp_date">Completion Date  </string>
 </resources>

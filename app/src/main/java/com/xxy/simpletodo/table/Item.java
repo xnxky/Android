@@ -1,5 +1,7 @@
 package com.xxy.simpletodo.table;
 
+import android.widget.CheckBox;
+
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -48,6 +50,8 @@ public class Item extends Model
   public boolean isDone;
 
   public boolean isChecked = false;
+
+  public transient CheckBox checkbox;
 
   public String getDate() {
     if(isDone) {

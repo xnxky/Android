@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,9 +17,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.activeandroid.query.Select;
+import com.google.common.collect.ImmutableList;
 import com.xxy.simpletodo.R;
 import com.xxy.simpletodo.adapter.ItemAdapter;
 import com.xxy.simpletodo.table.Item;
@@ -40,6 +46,8 @@ public class TabFragment extends Fragment {
   private BulkDeleteAction bulkDeleteAction =
       new BulkDeleteAction();
 
+  private View tabView;
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -51,9 +59,22 @@ public class TabFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     Log.i("xxy", "onCreateView");
-    View tabView = inflater.inflate(R.layout.tab_fragment, container, false);
+    tabView = inflater.inflate(R.layout.tab_fragment, container, false);
+    List<Integer> boldViewList = ImmutableList.of(
+        R.id.selectAllText,
+        R.id.priorityLabel,
+        R.id.highPriority,
+        R.id.mediumPriority,
+        R.id.lowPriority);
+    for(int viewId : boldViewList) {
+      TextView oneView = (TextView)tabView.findViewById(viewId);
+      oneView.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+      oneView.getPaint().setFakeBoldText(true);
+    }
     lvItems = (ListView) tabView.findViewById(R.id.fragmentItems);
+    setupSelectAllCheckBoxListener(tabView);
     setupListViewListener();
+
     return tabView;
   }
 
@@ -62,7 +83,16 @@ public class TabFragment extends Fragment {
     super.onActivityCreated(savedInstanceState);
     Log.i("xxy", "onActivityCreated");
     fetchItemsFromDb();
-    itemAdapter = new ItemAdapter(getActivity(), items);
+    FragmentActivity curActivity = getActivity();
+    Resources curResource = curActivity.getResources();
+    itemAdapter = new ItemAdapter(
+        curActivity,
+        items,
+        curResource.getColor(R.color.high),
+        curResource.getColor(R.color.medium),
+        curResource.getColor(R.color.low)
+    );
+
     lvItems.setAdapter(itemAdapter);
   }
 
@@ -70,6 +100,22 @@ public class TabFragment extends Fragment {
   public void onStart() {
     super.onStart();
     Log.i("xxy", "onStart");
+    //TODO: to understand what happened here:
+    //Interesting, do this in onActivityCreated() will not uncheck
+    //checkbox_selector in ui even if monitoring indicates the code is executed
+    //Maybe the checkbox_selector found there is actually a different one?
+    /*
+    CheckBox selectAllCheckBox = (CheckBox)tabView.findViewById(R.id.selectAllCheckBox);
+    TextView selectAllText = (TextView)tabView.findViewById(R.id.selectAllText);
+    selectAllCheckBox.setChecked(false);
+    selectAllText.setText(R.string.select_all);
+    */
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    Log.i("xxy", "onResume");
   }
 
   @Override
@@ -109,16 +155,39 @@ public class TabFragment extends Fragment {
     );
   }
 
+  public void setupSelectAllCheckBoxListener(View tabView) {
+    final CheckBox selectAllCheckBox = (CheckBox)tabView.findViewById(R.id.selectAllCheckBox);
+    final TextView textView = (TextView)tabView.findViewById(R.id.selectAllText);
+    selectAllCheckBox.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View view) {
+            Log.d("xxySetSelectAll", Boolean.valueOf(selectAllCheckBox.isChecked()).toString());
+            Log.d("xxyTabViewOnClick", Integer.valueOf(selectAllCheckBox.getId()).toString());
+            boolean allCheckStatus = selectAllCheckBox.isChecked();
+            if(allCheckStatus) {
+              textView.setText(R.string.unselect_all);
+            } else {
+              textView.setText(R.string.select_all);
+            }
+            for (Item item : items) {
+              if(item.checkbox != null) {
+                item.checkbox.setChecked(allCheckStatus);
+              }
+              item.isChecked = allCheckStatus;
+            }
+            itemAdapter.notifyDataSetChanged();
+          }
+        }
+    );
+  }
+
   private void fetchItemsFromDb() {
     boolean isDone = getArguments().getBoolean("isDone");
     items = new Select().
       from(Item.class).
       where("isDone = ?", isDone).
       execute();
-
-    for(Item item : items) {
-      item.isChecked = false;
-    }
   }
 
   @Override

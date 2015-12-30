@@ -17,11 +17,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.EditItemActivity"
-            android:label="@string/title_activity_edit_item"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
             android:name=".activity.ViewItemActivity"
             android:label="ViewItemActivity"
             android:theme="@style/AppTheme.NoActionBar">
