@@ -119,7 +119,7 @@ public class TodoFragment extends TabFragment {
                         new DialogInterface.OnClickListener() {
                           @Override
                           public void onClick(DialogInterface dialog, int which) {
-                            cancelModifiedItem();
+                            handleLastModify();
                           }
                         }
                     ).
@@ -130,16 +130,9 @@ public class TodoFragment extends TabFragment {
                               DialogInterface dialog, int keyCode, KeyEvent event) {
                             if(keyCode == KeyEvent.KEYCODE_BACK &&
                                 event.getRepeatCount() == 0) {
-                              if(! refreshIndexList.isEmpty()) {
-                                for(int idx : refreshIndexList) {
-                                  Item targetItem = getItem(idx);
-                                  items.remove(idx);
-                                  Item.insert(items, targetItem);
-                                  itemAdapter.notifyDataSetChanged();
-                                }
-                                refreshIndexList.clear();
+                              editIterator = null;
+                              handleLastModify();
                               }
-                            }
                             return false;
                           }
                         }).create();
@@ -178,22 +171,21 @@ public class TodoFragment extends TabFragment {
       refreshIndexList.add(index);
     } else {
       Item.insert(items, targetItem);
+      itemAdapter.notifyDataSetChanged();
     }
+    handleLastModify();
+  }
 
+  private void handleLastModify() {
     if(editIterator == null || editItem()) {
       for(int refreshIdx : refreshIndexList) {
         Item refreshItem = getItem(refreshIdx);
         items.remove(refreshIdx);
         Item.insert(items, refreshItem);
       }
+      if(!refreshIndexList.isEmpty())
+        itemAdapter.notifyDataSetChanged();
       refreshIndexList.clear();
-      itemAdapter.notifyDataSetChanged();
-    }
-  }
-
-  private void cancelModifiedItem() {
-    if(editIterator == null || editItem()) {
-      itemAdapter.notifyDataSetChanged();
     }
   }
 
