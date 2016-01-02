@@ -37,7 +37,10 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+I spent a lot of time to make the theme right, like actionbar, for AppCompatActivity, 
+android.suport.v7.app. Many info I found in web does not apply to it any more. for
+instance, I tried to set background color by creating a new theme and customizing its
+color, but apprantly, no matter what color I give, it's always black.
 
 ## License
 
