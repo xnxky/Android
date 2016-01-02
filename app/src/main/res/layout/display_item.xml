@@ -9,28 +9,29 @@
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:layout_weight="@integer/ItemName"
-        android:gravity="left|center_vertical"
-        android:text="task name"
+        android:gravity="center_vertical"
         android:textSize="@dimen/text_size"
+        android:textStyle="bold"
         android:lines="1"
         android:ellipsize="end"
-        android:layout_marginLeft="3dp"
+        android:layout_marginLeft="@dimen/line_start_margin"
+        android:layout_marginStart="@dimen/line_start_margin"
         android:id="@+id/itemName"/>
 
     <TextView
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:layout_weight="@integer/ItemDate"
-        android:gravity="left|center_vertical"
-        android:text="due date"
+        android:gravity="end|center_vertical"
         android:textSize="@dimen/text_size"
+        android:textStyle="bold"
         android:id="@+id/itemDueDate"/>
 
     <CheckBox
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:layout_weight="@integer/ItemCheckbox"
-        android:gravity="right|center_vertical"
+        android:gravity="center_vertical"
         android:focusable="false"
         android:id="@+id/checkbox"/>
 

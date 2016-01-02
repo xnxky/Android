@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,17 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.Spinner;
 
 import com.xxy.simpletodo.R;
+import com.xxy.simpletodo.layout.LabeledDatePicker;
+import com.xxy.simpletodo.layout.LabeledEditText;
+import com.xxy.simpletodo.layout.LabeledSpinner;
 import com.xxy.simpletodo.table.Item;
 
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,19 +32,16 @@ import java.util.List;
 public class TodoFragment extends TabFragment {
 
   private Iterator<Item> editIterator;
+  private ArrayAdapter<String> priorityAdapter;
   private int editItemIndex;
-  private final List<String> priorityList;
+  private List<Integer> refreshIndexList;
 
   public TodoFragment() {
     super();
     Bundle bundle = new Bundle();
     bundle.putBoolean("isDone", false);
     this.setArguments(bundle);
-
-    priorityList = new ArrayList<>();
-    for(Item.Priority onePriority : Item.Priority.values()) {
-      priorityList.add(onePriority.name());
-    }
+    refreshIndexList = new ArrayList<>();
   }
 
   @Override
@@ -58,8 +55,8 @@ public class TodoFragment extends TabFragment {
 
   @Override
   public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.todo_menu, menu);
+    super.onCreateOptionsMenu(menu, inflater);
   }
 
   @Override
@@ -104,21 +101,7 @@ public class TodoFragment extends TabFragment {
   private void modifyItem(final int index) {
     LayoutInflater inflater = LayoutInflater.from(getActivity());
     final View view = inflater.inflate(R.layout.edit_item, null);
-    Spinner prioritySpinner = (Spinner)view.findViewById(
-        R.id.etItemPriority);
-
-    ArrayAdapter<String> adapter = new ArrayAdapter<>(
-        getActivity(),
-        android.R.layout.simple_spinner_item,
-        priorityList
-    );
-
-    adapter.setDropDownViewResource(
-        android.R.layout.simple_list_item_single_choice);
-
-    prioritySpinner.setAdapter(adapter);
-
-    displayItem(view, index);
+    setDisplayItem(view, index);
     Dialog dialog = new AlertDialog.
                     Builder(getActivity()).
                     setView(view).
@@ -139,52 +122,71 @@ public class TodoFragment extends TabFragment {
                             cancelModifiedItem();
                           }
                         }
-                    ).create();
+                    ).
+                    setOnKeyListener(
+                        new DialogInterface.OnKeyListener() {
+                          @Override
+                          public boolean onKey(
+                              DialogInterface dialog, int keyCode, KeyEvent event) {
+                            if(keyCode == KeyEvent.KEYCODE_BACK &&
+                                event.getRepeatCount() == 0) {
+                              if(! refreshIndexList.isEmpty()) {
+                                for(int idx : refreshIndexList) {
+                                  Item targetItem = getItem(idx);
+                                  items.remove(idx);
+                                  Item.insert(items, targetItem);
+                                  itemAdapter.notifyDataSetChanged();
+                                }
+                                refreshIndexList.clear();
+                              }
+                            }
+                            return false;
+                          }
+                        }).create();
     dialog.show();
   }
 
-  private void displayItem(View view, int index) {
+  protected void setDisplayItem(View view, int index) {
     Item targetItem = getItem(index);
-    EditText etName = (EditText)view.findViewById(R.id.etItemName);
-    etName.setText(targetItem.name);
-    EditText etConent = (EditText)view.findViewById(R.id.etItemContent);
-    etConent.setText(targetItem.content);
-    Spinner prioritySpinner = (Spinner)view.findViewById(R.id.etItemPriority);
-    setPrioritySpinnerValue(prioritySpinner, targetItem);
-    EditText etDueDate = (EditText)view.findViewById(R.id.etItemDueDate);
-    etDueDate.setText(targetItem.getDate());
-    DatePicker datePicker = (DatePicker)view.findViewById(R.id.datePicker);
-    updateDateDisplay(datePicker);
-  }
-
-  private void updateDateDisplay(DatePicker datepicker) {
-    Calendar calendar = Calendar.getInstance();
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH);
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-    datepicker.init(year, month, day, null);
-  }
-
-  private void setPrioritySpinnerValue(Spinner spinner, Item item) {
-    ArrayAdapter<String> adapter = (ArrayAdapter)spinner.getAdapter();
-    int position = adapter.getPosition(item.priority.name());
-    spinner.setSelection(position);
+    LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
+    etName.setLabelAndContent(
+        curResource.getString(R.string.task_name_label), targetItem.name);
+    LabeledEditText etContent = (LabeledEditText)view.findViewById(R.id.etItemContent);
+    etContent.setLabelAndContent(
+        curResource.getString(R.string.task_note_label), targetItem.content);
+    LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
+    spinner.setLabel(curResource.getString(R.string.task_priority_label));
+    spinner.setContent(targetItem.priority.name(), getPriorityAdapter());
+    LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
+    datePicker.setLabel(curResource.getString(R.string.task_due_date_label));
+    datePicker.setContent(targetItem.getDate());
   }
 
   private void saveModifiedItem(View view, int index) {
     Item targetItem = getItem(index);
-    if(index == items.size()) items.add(targetItem);
-    EditText etName = (EditText)view.findViewById(R.id.etItemName);
-    targetItem.name = etName.getText().toString();
-    EditText etConent = (EditText)view.findViewById(R.id.etItemContent);
-    targetItem.content = etConent.getText().toString();
-    Spinner prioritySpinner = (Spinner)view.findViewById(R.id.etItemPriority);
-    targetItem.priority = Item.Priority.valueOf((String)prioritySpinner.getSelectedItem());
-    EditText etDueDate = (EditText)view.findViewById(R.id.etItemDueDate);
-    targetItem.setDueDate(etDueDate.getText().toString());
+    LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
+    targetItem.name = etName.getContentString();
+    LabeledEditText etConent = (LabeledEditText)view.findViewById(R.id.etItemContent);
+    targetItem.content = etConent.getContentString();
+    LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
+    targetItem.priority = Item.Priority.valueOf(spinner.getContentString());
+    LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
+    targetItem.setDueDate(datePicker.getContentString());
     targetItem.save();
 
+    if(index != items.size()) {
+      refreshIndexList.add(index);
+    } else {
+      Item.insert(items, targetItem);
+    }
+
     if(editIterator == null || editItem()) {
+      for(int refreshIdx : refreshIndexList) {
+        Item refreshItem = getItem(refreshIdx);
+        items.remove(refreshIdx);
+        Item.insert(items, refreshItem);
+      }
+      refreshIndexList.clear();
       itemAdapter.notifyDataSetChanged();
     }
   }
@@ -211,15 +213,6 @@ public class TodoFragment extends TabFragment {
     itemAdapter.notifyDataSetChanged();
   }
 
-  private Item getDefaultItem() {
-    return new Item(
-           "Name",
-           "Content",
-           Item.Priority.MEDIUM,
-           new LocalDate().toString(Item.DATE_FORMAT),
-           false);
-  }
-
   private void setupEditItemListener() {
     lvItems.setOnItemClickListener(
         new AdapterView.OnItemClickListener() {
@@ -233,14 +226,18 @@ public class TodoFragment extends TabFragment {
     );
   }
 
-  private Item getItem(int index) {
-    Item targetItem;
-    if(index == items.size()) {
-      targetItem = getDefaultItem();
-    } else {
-      targetItem = items.get(index);
+  public ArrayAdapter<String> getPriorityAdapter() {
+    if(priorityAdapter == null) {
+      priorityAdapter = new ArrayAdapter<>(
+          getActivity(),
+          android.R.layout.simple_spinner_item,
+          Item.getPriorityList()
+      );
+      priorityAdapter.setDropDownViewResource(
+          android.R.layout.simple_list_item_single_choice
+      );
     }
-    return targetItem;
+    return priorityAdapter;
   }
 
 }

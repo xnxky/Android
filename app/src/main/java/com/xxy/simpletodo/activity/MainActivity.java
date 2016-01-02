@@ -22,9 +22,11 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     View view = findViewById(R.id.fragment_container);
-    view.getBackground().setAlpha(60);
+    //view.getBackground().setAlpha(200);
 
     final ActionBar tabBar = getSupportActionBar();
+    tabBar.setBackgroundDrawable(
+        getResources().getDrawable(R.drawable.title_background));
     tabBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
     List<String> tabTextList = ImmutableList.of(

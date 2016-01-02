@@ -11,24 +11,28 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <com.xxy.simpletodo.layout.LabeledEditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.xxy.simpletodo.layout.LabeledTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/etItemName"/>
 
-    <com.xxy.simpletodo.layout.LabeledSpinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.xxy.simpletodo.layout.LabeledTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/etItemPriority"/>
 
-    <com.xxy.simpletodo.layout.LabeledDatePicker
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
+    <com.xxy.simpletodo.layout.LabeledTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/datePicker"/>
 
-    <com.xxy.simpletodo.layout.LabeledEditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.xxy.simpletodo.layout.LabeledTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/etItemContent"/>
+
 </LinearLayout>

@@ -7,9 +7,10 @@
     <string name="main_activity_view_item">Delete</string>
     <string name="select_all">Select All</string>
     <string name="unselect_all">Unselect All</string>
-    <string name="task_name">Task Name  </string>
-    <string name="task_note">Note  </string>
-    <string name="task_priority">Priority  </string>
-    <string name="task_due_date">Due Date  </string>
-    <string name="task_comp_date">Completion Date  </string>
+    <string name="task_name_label">Task Name:</string>
+    <string name="task_due_date_label">Due:</string>
+    <string name="task_comp_date_label">Completion Date:</string>
+    <string name="task_priority_label">Priority:</string>
+    <string name="task_note_label">Note:</string>
+    <string name="back">Back</string>
 </resources>

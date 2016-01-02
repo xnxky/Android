@@ -1,6 +1,5 @@
 package com.xxy.simpletodo.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -27,6 +26,10 @@ import com.xxy.simpletodo.R;
 import com.xxy.simpletodo.adapter.ItemAdapter;
 import com.xxy.simpletodo.table.Item;
 
+import org.joda.time.LocalDate;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,11 +38,10 @@ import java.util.List;
  */
 public class TabFragment extends Fragment {
 
-  protected static final int RESULT_OK = Activity.RESULT_OK;
-
   protected List<Item> items;
   protected ListView lvItems;
   protected ItemAdapter itemAdapter;
+  protected Resources curResource;
 
   private SingleDeleteAction singleDeleteAction =
       new SingleDeleteAction();
@@ -84,7 +86,7 @@ public class TabFragment extends Fragment {
     Log.i("xxy", "onActivityCreated");
     fetchItemsFromDb();
     FragmentActivity curActivity = getActivity();
-    Resources curResource = curActivity.getResources();
+    curResource = curActivity.getResources();
     itemAdapter = new ItemAdapter(
         curActivity,
         items,
@@ -110,6 +112,11 @@ public class TabFragment extends Fragment {
     selectAllCheckBox.setChecked(false);
     selectAllText.setText(R.string.select_all);
     */
+    CheckBox selectAllCheckBox = (CheckBox)tabView.findViewById(R.id.selectAllCheckBox);
+    TextView textView = (TextView)tabView.findViewById(R.id.selectAllText);
+    int textId = selectAllCheckBox.isChecked() ?
+        R.string.unselect_all : R.string.select_all;
+    textView.setText(textId);
   }
 
   @Override
@@ -162,8 +169,6 @@ public class TabFragment extends Fragment {
         new View.OnClickListener() {
           @Override
           public void onClick(View view) {
-            Log.d("xxySetSelectAll", Boolean.valueOf(selectAllCheckBox.isChecked()).toString());
-            Log.d("xxyTabViewOnClick", Integer.valueOf(selectAllCheckBox.getId()).toString());
             boolean allCheckStatus = selectAllCheckBox.isChecked();
             if(allCheckStatus) {
               textView.setText(R.string.unselect_all);
@@ -188,6 +193,9 @@ public class TabFragment extends Fragment {
       from(Item.class).
       where("isDone = ?", isDone).
       execute();
+    Comparator<Item> comparator = isDone?
+        Item.doneComparator : Item.toDoComparator;
+    Collections.sort(items, comparator);
   }
 
   @Override
@@ -232,6 +240,25 @@ public class TabFragment extends Fragment {
       }
       itemAdapter.notifyDataSetChanged();
     }
+  }
+
+  protected Item getItem(int index) {
+    Item targetItem;
+    if(index == items.size()) {
+      targetItem = getDefaultItem();
+    } else {
+      targetItem = items.get(index);
+    }
+    return targetItem;
+  }
+
+  private Item getDefaultItem() {
+    return new Item(
+           "",
+           "",
+           Item.Priority.MEDIUM,
+           new LocalDate().toString(Item.DATE_FORMAT),
+           false);
   }
 
   private void createDeleteAlertDialog(

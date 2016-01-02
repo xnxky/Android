@@ -7,4 +7,6 @@
     <color name="high">#afcc0000</color>
     <color name="medium">#afff6600</color>
     <color name="low">#af00cc00</color>
+
+    <color name="black">#000000</color>
 </resources>

@@ -5,7 +5,8 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="selectAllCheckBoxMargin">9dp</dimen>
     <dimen name="priority_label_length">15dp</dimen>
-    <dimen name="text_size">15dp</dimen>
+    <dimen name="text_size">15sp</dimen>
     <dimen name="text_view_height">20dp</dimen>
     <dimen name="padding">5dp</dimen>
+    <dimen name="line_start_margin">3dp</dimen>
 </resources>
