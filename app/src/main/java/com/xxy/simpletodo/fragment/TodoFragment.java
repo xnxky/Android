@@ -1,9 +1,8 @@
 package com.xxy.simpletodo.fragment;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,9 +14,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.xxy.simpletodo.R;
+import com.xxy.simpletodo.dialogFragment.EditDialogFragment;
 import com.xxy.simpletodo.layout.LabeledDatePicker;
 import com.xxy.simpletodo.layout.LabeledEditText;
 import com.xxy.simpletodo.layout.LabeledSpinner;
+import com.xxy.simpletodo.listener.DialogListener;
 import com.xxy.simpletodo.table.Item;
 
 import org.joda.time.LocalDate;
@@ -35,6 +36,7 @@ public class TodoFragment extends TabFragment {
   private ArrayAdapter<String> priorityAdapter;
   private int editItemIndex;
   private List<Integer> refreshIndexList;
+  private final EditDialogListener editDialogListener;
 
   public TodoFragment() {
     super();
@@ -42,6 +44,7 @@ public class TodoFragment extends TabFragment {
     bundle.putBoolean("isDone", false);
     this.setArguments(bundle);
     refreshIndexList = new ArrayList<>();
+    editDialogListener = new EditDialogListener();
   }
 
   @Override
@@ -99,81 +102,12 @@ public class TodoFragment extends TabFragment {
   }
 
   private void modifyItem(final int index) {
-    LayoutInflater inflater = LayoutInflater.from(getActivity());
-    final View view = inflater.inflate(R.layout.edit_item, null);
-    setDisplayItem(view, index);
-    Dialog dialog = new AlertDialog.
-                    Builder(getActivity()).
-                    setView(view).
-                    setPositiveButton(
-                        "Save",
-                        new DialogInterface.OnClickListener() {
-                          @Override
-                          public void onClick(DialogInterface dialog, int which) {
-                            saveModifiedItem(view, index);
-                          }
-                        }
-                    ).
-                    setNegativeButton(
-                        "Cancel",
-                        new DialogInterface.OnClickListener() {
-                          @Override
-                          public void onClick(DialogInterface dialog, int which) {
-                            handleLastModify();
-                          }
-                        }
-                    ).
-                    setOnKeyListener(
-                        new DialogInterface.OnKeyListener() {
-                          @Override
-                          public boolean onKey(
-                              DialogInterface dialog, int keyCode, KeyEvent event) {
-                            if(keyCode == KeyEvent.KEYCODE_BACK &&
-                                event.getRepeatCount() == 0) {
-                              editIterator = null;
-                              handleLastModify();
-                              }
-                            return false;
-                          }
-                        }).create();
-    dialog.show();
-  }
+    EditDialogFragment editDialogFragment =
+        EditDialogFragment.newInstance(editDialogListener);
+    editDialogFragment.setIndex(index);
+    FragmentManager fm = getActivity().getSupportFragmentManager();
+    editDialogFragment.show(fm, "edit");
 
-  protected void setDisplayItem(View view, int index) {
-    Item targetItem = getItem(index);
-    LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
-    etName.setLabelAndContent(
-        curResource.getString(R.string.task_name_label), targetItem.name);
-    LabeledEditText etContent = (LabeledEditText)view.findViewById(R.id.etItemContent);
-    etContent.setLabelAndContent(
-        curResource.getString(R.string.task_note_label), targetItem.content);
-    LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
-    spinner.setLabel(curResource.getString(R.string.task_priority_label));
-    spinner.setContent(targetItem.priority.name(), getPriorityAdapter());
-    LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
-    datePicker.setLabel(curResource.getString(R.string.task_due_date_label));
-    datePicker.setContent(targetItem.getDate());
-  }
-
-  private void saveModifiedItem(View view, int index) {
-    Item targetItem = getItem(index);
-    LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
-    targetItem.name = etName.getContentString();
-    LabeledEditText etConent = (LabeledEditText)view.findViewById(R.id.etItemContent);
-    targetItem.content = etConent.getContentString();
-    LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
-    targetItem.priority = Item.Priority.valueOf(spinner.getContentString());
-    LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
-    targetItem.setDueDate(datePicker.getContentString());
-    targetItem.save();
-
-    if(index != items.size()) {
-      refreshIndexList.add(index);
-    } else {
-      Item.insert(items, targetItem);
-      itemAdapter.notifyDataSetChanged();
-    }
-    handleLastModify();
   }
 
   private void handleLastModify() {
@@ -230,6 +164,61 @@ public class TodoFragment extends TabFragment {
       );
     }
     return priorityAdapter;
+  }
+
+  private class EditDialogListener implements DialogListener {
+    @Override
+    public void onPositiveButtonPressed(DialogInterface dialog, View view, int index) {
+      Item targetItem = getItem(index);
+      LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
+      targetItem.name = etName.getContentString();
+      LabeledEditText etConent = (LabeledEditText)view.findViewById(R.id.etItemContent);
+      targetItem.content = etConent.getContentString();
+      LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
+      targetItem.priority = Item.Priority.valueOf(spinner.getContentString());
+      LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
+      targetItem.setDueDate(datePicker.getContentString());
+      targetItem.save();
+
+      if(index != items.size()) {
+        refreshIndexList.add(index);
+      } else {
+        Item.insert(items, targetItem);
+        itemAdapter.notifyDataSetChanged();
+      }
+      handleLastModify();
+    }
+
+    @Override
+    public void onNegativeButtonPressed(DialogInterface dialog) {
+      handleLastModify();
+    }
+
+    @Override
+    public void onBackKeyClicked(int keyCode, KeyEvent event) {
+      if(keyCode == KeyEvent.KEYCODE_BACK &&
+          event.getRepeatCount() == 0) {
+        editIterator = null;
+        handleLastModify();
+      }
+    }
+
+    @Override
+    public void initialize(View view, int index) {
+      Item targetItem = getItem(index);
+      LabeledEditText etName = (LabeledEditText)view.findViewById(R.id.etItemName);
+      etName.setLabelAndContent(
+          curResource.getString(R.string.task_name_label), targetItem.name);
+      LabeledEditText etContent = (LabeledEditText)view.findViewById(R.id.etItemContent);
+      etContent.setLabelAndContent(
+          curResource.getString(R.string.task_note_label), targetItem.content);
+      LabeledSpinner spinner = (LabeledSpinner)view.findViewById(R.id.etItemPriority);
+      spinner.setLabel(curResource.getString(R.string.task_priority_label));
+      spinner.setContent(targetItem.priority.name(), getPriorityAdapter());
+      LabeledDatePicker datePicker = (LabeledDatePicker)view.findViewById(R.id.datePicker);
+      datePicker.setLabel(curResource.getString(R.string.task_due_date_label));
+      datePicker.setContent(targetItem.getDate());
+    }
   }
 
 }

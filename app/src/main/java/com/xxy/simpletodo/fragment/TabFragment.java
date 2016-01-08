@@ -1,14 +1,14 @@
 package com.xxy.simpletodo.fragment;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +24,8 @@ import com.activeandroid.query.Select;
 import com.google.common.collect.ImmutableList;
 import com.xxy.simpletodo.R;
 import com.xxy.simpletodo.adapter.ItemAdapter;
+import com.xxy.simpletodo.dialogFragment.DeleteDialogFragment;
+import com.xxy.simpletodo.listener.DialogListener;
 import com.xxy.simpletodo.table.Item;
 
 import org.joda.time.LocalDate;
@@ -49,6 +51,13 @@ public class TabFragment extends Fragment {
       new BulkDeleteAction();
 
   private View tabView;
+  private final DeleteDialogListener deleteDialogListener;
+
+  public TabFragment() {
+    super();
+    deleteDialogListener =
+        new DeleteDialogListener();
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -214,7 +223,7 @@ public class TabFragment extends Fragment {
     }
   }
 
-  private interface DeleteAction {
+  public interface DeleteAction {
     void deleteItem(int pos);
   }
 
@@ -265,29 +274,33 @@ public class TabFragment extends Fragment {
       final DeleteAction deleteAction,
       final int itemIndex) {
 
-    Dialog dialog = new AlertDialog.
-                        Builder(getActivity()).
-                        setTitle("Alert").
-                        setMessage("Are you sure you want to delete?").
-                        setPositiveButton(
-                            "Yes",
-                            new DialogInterface.OnClickListener() {
-                              @Override
-                              public void onClick(DialogInterface dialog, int which) {
-                                deleteAction.deleteItem(itemIndex);
-                              }
-                            }
-                        ).
-                        setNegativeButton(
-                            "No",
-                            new DialogInterface.OnClickListener() {
-                              @Override
-                              public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                              }
-                            }
-                        ).create();
-    dialog.show();
+    deleteDialogListener.setAction(deleteAction);
+    DeleteDialogFragment deleteDialogFragment =
+        DeleteDialogFragment.newInstance(deleteDialogListener);
+    deleteDialogFragment.setIndex(itemIndex);
+    FragmentManager fm = getActivity().getSupportFragmentManager();
+    deleteDialogFragment.show(fm, "delete");
+  }
+
+  private class DeleteDialogListener implements DialogListener {
+    private DeleteAction deleteAction;
+
+    public void setAction(DeleteAction deleteAction) {
+      this.deleteAction = deleteAction;
+    }
+
+    public void onPositiveButtonPressed(
+        DialogInterface dialog, View view, int index) {
+      deleteAction.deleteItem(index);
+    }
+
+    public void onNegativeButtonPressed(DialogInterface dialog) {
+      dialog.dismiss();
+    }
+
+    public void onBackKeyClicked(int keyCode, KeyEvent event) {}
+
+    public void initialize(View view, int index) {}
   }
 
 }

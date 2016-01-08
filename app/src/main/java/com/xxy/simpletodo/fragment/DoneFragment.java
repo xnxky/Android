@@ -1,9 +1,8 @@
 package com.xxy.simpletodo.fragment;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.xxy.simpletodo.R;
+import com.xxy.simpletodo.dialogFragment.ViewDialogFragment;
 import com.xxy.simpletodo.layout.LabeledTextView;
+import com.xxy.simpletodo.listener.DialogListener;
 import com.xxy.simpletodo.table.Item;
 
 import java.util.Iterator;
@@ -25,12 +26,15 @@ import java.util.Iterator;
 public class DoneFragment extends TabFragment {
 
   private Iterator<Item> iterator;
+  private int viewItemIndex;
+  private final ViewDialogListener viewDialogListener;
 
   public DoneFragment() {
     super();
     Bundle bundle = new Bundle();
     bundle.putBoolean("isDone", true);
     this.setArguments(bundle);
+    viewDialogListener = new ViewDialogListener();
   }
 
   @Override
@@ -60,75 +64,21 @@ public class DoneFragment extends TabFragment {
   //iteration is over
   private void viewItem() {
     while(iterator!=null && iterator.hasNext()) {
+      viewItemIndex ++;
       Item nextItem = iterator.next();
       if(nextItem.isChecked){
-        viewItem(nextItem);
+        viewItem(viewItemIndex);
         break;
       }
     }
   }
 
   private void viewItem(int index) {
-    Item item = getItem(index);
-    viewItem(item);
-  }
-
-  private void viewItem(Item item) {
-    LayoutInflater inflater = LayoutInflater.from(getActivity());
-    final View view = inflater.inflate(R.layout.view_item, null);
-    setDisplayItem(view, item);
-    Dialog dialog = new AlertDialog.
-        Builder(getActivity()).
-        setView(view).
-        setPositiveButton(
-            "Back",
-            new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                viewItem();
-              }
-            }
-        ).
-        setOnKeyListener(
-            new DialogInterface.OnKeyListener() {
-              @Override
-              public boolean onKey(
-                  DialogInterface dialog, int keyCode, KeyEvent event) {
-                if(keyCode==KeyEvent.KEYCODE_BACK &&
-                    event.getRepeatCount()==0) {
-                  iterator = null;
-                }
-                return false;
-              }
-            }
-        ).create();
-    dialog.show();
-  }
-
-  protected void setDisplayItem(View view, Item targetItem) {
-    LabeledTextView etName = (LabeledTextView)view.findViewById(R.id.etItemName);
-    etName.setLabelAndContent(
-        curResource.getString(R.string.task_name_label),
-        targetItem.name);
-
-    LabeledTextView tvDate = (LabeledTextView)view.findViewById(R.id.datePicker);
-    tvDate.setLabelAndContent(
-        curResource.getString(R.string.task_comp_date_label),
-        targetItem.getDate()
-    );
-
-    LabeledTextView tvPriority = (LabeledTextView)view.findViewById(R.id.etItemPriority);
-    tvPriority.setLabelAndContent(
-        curResource.getString(R.string.task_priority_label),
-        targetItem.priority.name()
-    );
-
-    LabeledTextView etConent = (LabeledTextView)view.findViewById(R.id.etItemContent);
-    etConent.setLabelAndContent(
-        curResource.getString(R.string.task_note_label),
-        targetItem.content
-    );
+    ViewDialogFragment dialogFragment =
+        ViewDialogFragment.newIntance(viewDialogListener);
+    dialogFragment.setIndex(index);
+    FragmentManager fm = getActivity().getSupportFragmentManager();
+    dialogFragment.show(fm, "view");
   }
 
   @Override
@@ -141,6 +91,7 @@ public class DoneFragment extends TabFragment {
   public boolean onOptionsItemSelected(MenuItem item) {
     switch(item.getItemId()) {
       case R.id.view_item_menu:
+        viewItemIndex = -1;
         iterator = items.iterator();
         viewItem();
         return true;
@@ -164,6 +115,54 @@ public class DoneFragment extends TabFragment {
       }
     }
     itemAdapter.notifyDataSetChanged();
+  }
+
+  private class ViewDialogListener implements DialogListener {
+    @Override
+    public void onPositiveButtonPressed(
+        DialogInterface dialog, View view, int index) {
+      dialog.dismiss();
+      viewItem();
+    }
+
+    @Override
+    public void onNegativeButtonPressed(DialogInterface dialog) {
+    }
+
+    @Override
+    public void onBackKeyClicked(int keyCode, KeyEvent event) {
+      if(keyCode==KeyEvent.KEYCODE_BACK &&
+          event.getRepeatCount()==0) {
+        iterator = null;
+      }
+    }
+
+    @Override
+    public void initialize(View view, int index) {
+      Item targetItem = getItem(index);
+      LabeledTextView etName = (LabeledTextView)view.findViewById(R.id.etItemName);
+      etName.setLabelAndContent(
+          curResource.getString(R.string.task_name_label),
+          targetItem.name);
+
+      LabeledTextView tvDate = (LabeledTextView)view.findViewById(R.id.datePicker);
+      tvDate.setLabelAndContent(
+          curResource.getString(R.string.task_comp_date_label),
+          targetItem.getDate()
+      );
+
+      LabeledTextView tvPriority = (LabeledTextView)view.findViewById(R.id.etItemPriority);
+      tvPriority.setLabelAndContent(
+          curResource.getString(R.string.task_priority_label),
+          targetItem.priority.name()
+      );
+
+      LabeledTextView etConent = (LabeledTextView)view.findViewById(R.id.etItemContent);
+      etConent.setLabelAndContent(
+          curResource.getString(R.string.task_note_label),
+          targetItem.content
+      );
+    }
   }
 
 }
