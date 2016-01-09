@@ -30,6 +30,7 @@ import com.xxy.simpletodo.table.Item;
 
 import org.joda.time.LocalDate;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -179,13 +180,13 @@ public class TabFragment extends Fragment {
           @Override
           public void onClick(View view) {
             boolean allCheckStatus = selectAllCheckBox.isChecked();
-            if(allCheckStatus) {
+            if (allCheckStatus) {
               textView.setText(R.string.unselect_all);
             } else {
               textView.setText(R.string.select_all);
             }
             for (Item item : items) {
-              if(item.checkbox != null) {
+              if (item.checkbox != null) {
                 item.checkbox.setChecked(allCheckStatus);
               }
               item.isChecked = allCheckStatus;
@@ -210,6 +211,19 @@ public class TabFragment extends Fragment {
   @Override
   public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     inflater.inflate(R.menu.main_menu, menu);
+
+    if(menu != null) {
+      if(menu.getClass().getSimpleName().equals("MenuBuilder")) {
+        try {
+          Method m = menu.
+              getClass().
+              getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+          m.setAccessible(true);
+          m.invoke(menu, true);
+        } catch (Exception e) {
+        }
+      }
+    }
   }
 
   @Override
