@@ -3,10 +3,17 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="dark_blue">#180065</color>
+    <color name="light_blue">#334ee9ff</color>
+    <color name="medium_green">#3d853e</color>
+    <color name="light_green">#3c2ae668</color>
+
 
     <color name="high">#afcc0000</color>
     <color name="medium">#afff6600</color>
     <color name="low">#af00cc00</color>
 
     <color name="black">#000000</color>
+
+    <color name="tabDown">#333333</color>
 </resources>

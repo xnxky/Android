@@ -232,6 +232,10 @@ public class TabFragment extends Fragment {
       case R.id.delete_item_menu:
         createDeleteAlertDialog(bulkDeleteAction, -1);
         return true;
+      case android.R.id.home:
+        //NavUtils.navigateUpFromSameTask(this);
+        getActivity().finish();
+        return true;
       default:
         return super.onOptionsItemSelected(item);
     }

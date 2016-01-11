@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     final ActionBar tabBar = getSupportActionBar();
     tabBar.setBackgroundDrawable(
         getResources().getDrawable(R.drawable.title_background));
+    tabBar.setDisplayHomeAsUpEnabled(true);
     tabBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
     List<String> tabTextList = ImmutableList.of(
