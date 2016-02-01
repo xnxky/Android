@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * Created by xxiao on 12/26/15.
  */
-public class TabFragment extends Fragment {
+public abstract class TabFragment extends Fragment {
 
   protected List<Item> items;
   protected ListView lvItems;
@@ -51,13 +51,31 @@ public class TabFragment extends Fragment {
   private BulkDeleteAction bulkDeleteAction =
       new BulkDeleteAction();
 
+  protected TabFragment theOtherFragment;
   private View tabView;
   private final DeleteDialogListener deleteDialogListener;
+
+  public abstract String getTitle();
+  public abstract int getTabImageId();
 
   public TabFragment() {
     super();
     deleteDialogListener =
         new DeleteDialogListener();
+  }
+
+  public void setTheOtherFragment(
+      TabFragment theOtherFragment
+  ) {
+    this.theOtherFragment = theOtherFragment;
+  }
+
+  public void addItem(Item item) {
+    Item.insert(items, item);
+  }
+
+  public void updateItems() {
+    itemAdapter.notifyDataSetChanged();
   }
 
   @Override

@@ -10,6 +10,11 @@
         <!-- <item name="android:alertDialogTheme">@style/AppAlertTheme</item> -->
     </style>
 
+    <style name="MyCustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">#0000FF</item>
+        <item name="tabBackground">@drawable/actionbar_tab_background</item>
+    </style>
+
     <style name="MyActionBarTabStyle" parent="android:style/Widget.Holo.ActionBar.TabView">
         <item name="android:background">@drawable/actionbar_tab_background</item>
     </style>

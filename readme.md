@@ -33,6 +33,8 @@ Here's a walkthrough of implemented user stories:
 
 <img src='https://github.com/xnxky/Android/blob/orig/simpleToDo.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
+<img src='https://github.com/xnxky/Android/blob/orig/simpleToDo2.gif' title='Updated ViewPager' width='' alt='updated ViewPager' />
+
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes

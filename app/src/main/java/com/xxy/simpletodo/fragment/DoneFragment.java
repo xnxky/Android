@@ -29,6 +29,16 @@ public class DoneFragment extends TabFragment {
   private int viewItemIndex;
   private final ViewDialogListener viewDialogListener;
 
+  @Override
+  public String getTitle() {
+    return "Complete";
+  }
+
+  @Override
+  public int getTabImageId() {
+    return R.drawable.done_tab;
+  }
+
   public DoneFragment() {
     super();
     Bundle bundle = new Bundle();
@@ -112,9 +122,11 @@ public class DoneFragment extends TabFragment {
         curItem.isDone = false;
         curItem.save();
         iterator.remove();
+        theOtherFragment.addItem(curItem);
       }
     }
     itemAdapter.notifyDataSetChanged();
+    theOtherFragment.updateItems();
   }
 
   private class ViewDialogListener implements DialogListener {

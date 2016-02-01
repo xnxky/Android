@@ -38,6 +38,16 @@ public class TodoFragment extends TabFragment {
   private List<Integer> refreshIndexList;
   private final EditDialogListener editDialogListener;
 
+  @Override
+  public String getTitle() {
+    return "ToDo";
+  }
+
+  @Override
+  public int getTabImageId() {
+    return R.drawable.todo_tab;
+  }
+
   public TodoFragment() {
     super();
     Bundle bundle = new Bundle();
@@ -134,9 +144,11 @@ public class TodoFragment extends TabFragment {
             new LocalDate().toString(Item.DATE_FORMAT));
         curItem.save();
         iterator.remove();
+        theOtherFragment.addItem(curItem);
       }
     }
     itemAdapter.notifyDataSetChanged();
+    theOtherFragment.updateItems();
   }
 
   private void setupEditItemListener() {
